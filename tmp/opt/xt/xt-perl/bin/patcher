@@ -1,0 +1,49 @@
+#!/opt/xt/xt-perl/bin/perl
+
+eval 'exec /opt/xt/xt-perl/bin/perl  -S $0 ${1+"$@"}'
+    if 0; # not running under some shell
+use strict;
+use warnings;
+use DBIx::Patcher;
+
+my $runnable = DBIx::Patcher::Runner->new_with_options;
+
+unless ($runnable->count_patch_dirs or $runnable->count_patch_files) {
+    unless ($runnable->install or $runnable->upgrade) {
+        print STDERR "Neither a command (install, upgrade) nor any patch files/directories were specified.\n";
+        print STDERR "Run '$0 --help' for usage information.\n";
+        exit 2;
+    }
+}
+
+
+if ($runnable->install) {
+    if ($runnable->patcher->ensure_patcher_table_exists and not $runnable->force) {
+        print STDERR "WARNING: DBIx::Patcher's 'dbadmin' schema is already deployed on this database.\n";
+        print STDERR "         If you want to reinstall it please rerun with the '--force' option.\n";
+        print STDERR "         N.B. this will drop and recreate the schema, destroying any patch logs.\n";
+        exit 3;
+    } else {
+        $runnable->patcher->deploy;
+        exit 0;
+    }
+}
+
+if ($runnable->upgrade) {
+    $runnable->patcher->upgrade;
+    exit 0;
+}
+    
+if ($runnable->just_add) {
+    print STDERR "--just-add set, will log patches in DB without applying them.\n";
+    $runnable->just_add_files;
+} elsif ($runnable->report) {
+    print STDERR "\n";
+    print STDERR "Patch status report\n";
+    print STDERR "===================\n\n";
+    $runnable->report_on_files;
+} else {
+    $runnable->process_files;
+}
+
+

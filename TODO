@@ -1,0 +1,21 @@
+=== 0.01
+- schema_loader
+- dump schema
+- create run
+* add patch
+* run patch
+    * if !find_patch
+* find_patch
+    * create_date desc
+* is_successful
+* --retry if previous failed
+* move import to run and change patcher script
+* clean up
+=== 0.03
+* --fake_add add patches pretending it succeeded
+=== 0.04
+* plugin
+    * default values
+    * collate_files($dir)
+=== 0.05
+* --install
