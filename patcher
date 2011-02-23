@@ -5,6 +5,8 @@ use warnings;
 use FindBin::libs;
 use Patcher;
 
+Patcher->run();
+
 __END__
 =pod
 

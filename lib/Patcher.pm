@@ -33,7 +33,7 @@ our $types = {
 };
 our $schema;
 
-sub import {
+sub run {
     my($package) = @_;
 
     GetOptions(
