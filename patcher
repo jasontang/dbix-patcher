@@ -20,25 +20,39 @@ patcher [--host=localhost] [--user=www] [--db=my_db] [--install] [--plugin=NAP::
 
 =head2 --install
 
+TBA - install the patcher schema before doing anything else
+
 =head2 --host
 
-Defaults to localhost
+Host of the database. Defaults to localhost
 
 =head2 --user
 
-Defaults to www
+User for connecting to the database. Defaults to www
 
 =head2 --database
+
+Name of the database
+
+=head2 --chop
+
+When patching remove this from the absolute path of the patch file to make
+the logging of patches relative from a certain point. Defaults to $PWD
 
 =head2 --retry
 
 For patches that have failed retry
 
+=head2 --add
+
+Any files found that haven't been run, just add them as if they run successfully
+
 =head2 --plugin
 
-=head2 --search_path
+TBA - specify a plugin to load and provide defaults/custom handling
 
+=head1 AUTHOR
 
-=head1
+Jason Tang
 
 =cut
