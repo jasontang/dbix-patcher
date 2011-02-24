@@ -108,12 +108,10 @@ sub _patch_it {
     print " ($md5)" if ($opts->{verbose});
 
     # find file order by desc
-    my $set = $schema->resultset('Patcher::Patch')->search_file($chopped);
+    my $last = $schema->resultset('Patcher::Patch')->search_file($chopped);
 
     my $skip;
-    if ($set->count) {
-        my $last = $set->first;
-
+    if ($last) {
         if ($last->b64digest eq $md5) {
             if ($last->is_successful) {
                 $state = 'SKIP';
