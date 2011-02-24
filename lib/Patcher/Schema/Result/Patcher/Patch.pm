@@ -45,11 +45,6 @@ __PACKAGE__->table("patcher.patch");
   data_type: 'text'
   is_nullable: 0
 
-=head2 basename
-
-  data_type: 'text'
-  is_nullable: 0
-
 =head2 success
 
   data_type: 'boolean'
@@ -87,8 +82,6 @@ __PACKAGE__->add_columns(
   },
   "filename",
   { data_type => "text", is_nullable => 0 },
-  "basename",
-  { data_type => "text", is_nullable => 0 },
   "success",
   { data_type => "boolean", default_value => \"false", is_nullable => 1 },
   "b64digest",
@@ -121,8 +114,8 @@ __PACKAGE__->belongs_to(
 );
 
 
-# Created by DBIx::Class::Schema::Loader v0.07002 @ 2011-02-19 15:51:40
-# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:0y3Kut6HA1SU2kFbQV4DCA
+# Created by DBIx::Class::Schema::Loader v0.07006 @ 2011-02-24 14:16:04
+# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:+4LgSu6uchpAfR4Lo2pTHQ
 
 
 sub is_successful {

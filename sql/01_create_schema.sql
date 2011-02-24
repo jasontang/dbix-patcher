@@ -13,7 +13,6 @@ CREATE TABLE patcher.patch (
     run_id integer REFERENCES patcher.run(id) DEFERRABLE,
     created timestamp with time zone DEFAULT now() NOT NULL,
     filename text NOT NULL,
-    basename text NOT NULL,
     success boolean DEFAULT false,
     b64digest TEXT,
     output text
