@@ -48,6 +48,7 @@ sub run {
         'debug'     => \$opts->{debug},
         'retry'     => \$opts->{retry},
         'chop=s'    => \$opts->{chop},
+        'add'       => \$opts->{add},
     );
 
     # FIXME: do we need to use a plugin?
@@ -160,18 +161,24 @@ sub _apply_patch {
 
 
     print "cmd: $cmd\n" if ($opts->{debug});
-    my $output = qx{$cmd 2>&1};
+
+    my $output = ($opts->{add}) ? 'PATCHER: Added' : qx{$cmd 2>&1};
 
     my $patch_fields = { output => $output };
     # successful
-    if ($output =~ m{ERROR:}xms) {
-        $state = 'OK';
-        $patch_fields = {
-            success => 1,
-        };
-    } else {
+    if (!$opts->{add} && $output =~ m{ERROR:}xms) {
         $state = 'FAILED';
         $patch_fields = {
+            output => $output,
+        };
+    } else {
+        if ($opts->{add}) {
+            $state = 'ADDED';
+        } else {
+            $state = 'OK';
+        }
+        $patch_fields = {
+            success => 1,
             output => $output,
         };
     }
