@@ -14,7 +14,7 @@ __END__
 
 =head1 SYNOPSIS
 
-patcher [--host=localhost] [--user=www] [--db=my_db] [--install] [--plugin=NAP::DC] patch_dir
+patcher [-h localhost] [-u www] [-d my_db] [-a] [--retry] [-c] patch_dir
 
 =head1 OPTIONS
 
@@ -22,19 +22,19 @@ patcher [--host=localhost] [--user=www] [--db=my_db] [--install] [--plugin=NAP::
 
 TBA - install the patcher schema before doing anything else
 
-=head2 --host
+=head2 --host -h
 
 Host of the database. Defaults to localhost
 
-=head2 --user
+=head2 --user -u
 
 User for connecting to the database. Defaults to www
 
-=head2 --database
+=head2 --database -d
 
 Name of the database
 
-=head2 --chop
+=head2 --chop -c
 
 When patching remove this from the absolute path of the patch file to make
 the logging of patches relative from a certain point. Defaults to $PWD
@@ -43,7 +43,7 @@ the logging of patches relative from a certain point. Defaults to $PWD
 
 For patches that have failed retry
 
-=head2 --add
+=head2 --add -a
 
 Any files found that haven't been run, just add them as if they run successfully
 

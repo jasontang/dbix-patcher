@@ -41,14 +41,15 @@ sub run {
         'user|u=s'    => \$opts->{user},
         'db|d=s'      => \$opts->{db},
         'pass|p=s'    => \$opts->{pass},
-        'install'   => \$opts->{install},
-        'plugin=s'  => \$opts->{plugin},
-        'verbose'   => \$opts->{verbose},
-        'dry'       => \$opts->{dry},
-        'debug'     => \$opts->{debug},
         'retry|r'     => \$opts->{retry},
         'chop|c=s'    => \$opts->{chop},
         'add|a'       => \$opts->{add},
+
+        'install'   => \$opts->{install},
+#        'plugin=s'  => \$opts->{plugin},
+        'verbose'   => \$opts->{verbose},
+        'debug'     => \$opts->{debug},
+#        'dry'       => \$opts->{dry},
     );
 
     # FIXME: do we need to use a plugin?
@@ -226,7 +227,7 @@ __END__
 
 =head1 SYNOPSIS
 
-patcher [--host=localhost] [--user=www] [--db=my_db] [--install] [--plugin=NAP::DC] patch_dir
+patcher [-h localhost] [-u www] [-d my_db] patch_dir
 
 =head1 OPTIONS
 

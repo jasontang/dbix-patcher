@@ -12,10 +12,11 @@ key: * todo; + written; - tested
 + move import to run and change patcher script
 * clean up
 + --add patches pretending it succeeded
-* use short options ie -d -h -u etc
++ use short options ie -d -h -u etc
 - change name space of modules to DBIx::Patcher
 === 0.02
 * --install
+* --dry
 === 0.03
 * plugin
     * default values
