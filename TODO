@@ -18,6 +18,7 @@ key: * todo; + written; - tested
 * --install
 * --dry
 * --verbose to show cmd run
+* option to do look up based on MD5
 === 0.03
 * plugin
     * default values
