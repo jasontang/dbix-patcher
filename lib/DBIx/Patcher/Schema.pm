@@ -1,4 +1,4 @@
-package Patcher::Schema;
+package DBIx::Patcher::Schema;
 
 # Created by DBIx::Class::Schema::Loader
 # DO NOT MODIFY THE FIRST PART OF THIS FILE

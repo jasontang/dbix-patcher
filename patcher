@@ -3,9 +3,9 @@
 use strict;
 use warnings;
 use FindBin::libs;
-use Patcher;
+use DBIx::Patcher;
 
-Patcher->run();
+DBIx::Patcher->run();
 
 __END__
 =pod

@@ -1,4 +1,4 @@
-package Patcher;
+package DBIx::Patcher;
 use strict;
 use warnings;
 use FindBin::libs;
@@ -8,7 +8,7 @@ use Data::Dump qw/pp/;
 use Getopt::Long;
 use Path::Class;
 use Time::HiRes     qw(usleep);
-use Patcher::Schema;
+use DBIx::Patcher::Schema;
 use IO::File;
 use Digest::MD5;
 
@@ -61,7 +61,7 @@ sub run {
     my $type = $opts->{type};
     my $db = $opts->{db};
     my $host = $opts->{host};
-    $schema = Patcher::Schema->connect(
+    $schema = DBIx::Patcher::Schema->connect(
         $types->{$opts->{type}}->{dsn}(),
         $opts->{user}, $opts->{pass},
     );
@@ -81,7 +81,7 @@ sub run {
     # patch with the files
     print "  Found ". scalar @files ." file(s)\n" if ($opts->{verbose});
     if (scalar @files) {
-        my $run = $schema->resultset('Patcher::Run')->create_run;
+        my $run = $schema->resultset('DBIx::Patcher::Run')->create_run;
 
         # create run record
         foreach my $file (@files) {
@@ -108,7 +108,8 @@ sub _patch_it {
     print " ($md5)" if ($opts->{verbose});
 
     # find file order by desc
-    my $last = $schema->resultset('Patcher::Patch')->search_file($chopped);
+    my $last = $schema->resultset('DBIx::Patcher::Patch')
+        ->search_file($chopped);
 
     my $skip;
     if ($last) {

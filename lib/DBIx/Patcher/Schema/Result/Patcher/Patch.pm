@@ -1,4 +1,4 @@
-package Patcher::Schema::Result::Patcher::Patch;
+package DBIx::Patcher::Schema::Result::Patcher::Patch;
 
 # Created by DBIx::Class::Schema::Loader
 # DO NOT MODIFY THE FIRST PART OF THIS FILE
@@ -12,7 +12,7 @@ __PACKAGE__->load_components("InflateColumn::DateTime");
 
 =head1 NAME
 
-Patcher::Schema::Result::Patcher::Patch
+DBIx::Patcher::Schema::Result::Patcher::Patch
 
 =cut
 
@@ -97,13 +97,13 @@ __PACKAGE__->set_primary_key("id");
 
 Type: belongs_to
 
-Related object: L<Patcher::Schema::Result::Patcher::Run>
+Related object: L<DBIx::Patcher::Schema::Result::Patcher::Run>
 
 =cut
 
 __PACKAGE__->belongs_to(
   "run",
-  "Patcher::Schema::Result::Patcher::Run",
+  "DBIx::Patcher::Schema::Result::Patcher::Run",
   { id => "run_id" },
   {
     is_deferrable => 1,

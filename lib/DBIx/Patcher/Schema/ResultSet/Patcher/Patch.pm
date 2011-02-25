@@ -1,4 +1,4 @@
-package Patcher::Schema::ResultSet::Patcher::Patch;
+package DBIx::Patcher::Schema::ResultSet::Patcher::Patch;
 # vim: ts=8 sts=4 et sw=4 sr sta
 use Moose;
 use namespace::autoclean;
