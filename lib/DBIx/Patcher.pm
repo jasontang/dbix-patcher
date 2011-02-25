@@ -7,10 +7,11 @@ use Carp;
 use Data::Dump qw/pp/;
 use Getopt::Long;
 use Path::Class;
-use Time::HiRes     qw(usleep);
 use DBIx::Patcher::Schema;
 use IO::File;
 use Digest::MD5;
+
+our $VERSION = '0.01';
 
 $|=1;
 our $opts = {
