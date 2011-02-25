@@ -37,18 +37,18 @@ sub run {
     my($package) = @_;
 
     GetOptions(
-        'host=s'    => \$opts->{host},
-        'user=s'    => \$opts->{user},
-        'db=s'      => \$opts->{db},
-        'pass=s'    => \$opts->{pass},
+        'host|h=s'    => \$opts->{host},
+        'user|u=s'    => \$opts->{user},
+        'db|d=s'      => \$opts->{db},
+        'pass|p=s'    => \$opts->{pass},
         'install'   => \$opts->{install},
         'plugin=s'  => \$opts->{plugin},
         'verbose'   => \$opts->{verbose},
         'dry'       => \$opts->{dry},
         'debug'     => \$opts->{debug},
-        'retry'     => \$opts->{retry},
-        'chop=s'    => \$opts->{chop},
-        'add'       => \$opts->{add},
+        'retry|r'     => \$opts->{retry},
+        'chop|c=s'    => \$opts->{chop},
+        'add|a'       => \$opts->{add},
     );
 
     # FIXME: do we need to use a plugin?

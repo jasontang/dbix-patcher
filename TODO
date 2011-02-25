@@ -13,7 +13,7 @@ key: * todo; + written; - tested
 * clean up
 + --add patches pretending it succeeded
 * use short options ie -d -h -u etc
-* change name space of modules to DBIx::Patcher
+- change name space of modules to DBIx::Patcher
 === 0.02
 * --install
 === 0.03
