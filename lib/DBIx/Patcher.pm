@@ -81,7 +81,7 @@ sub run {
     # patch with the files
     print "  Found ". scalar @files ." file(s)\n" if ($opts->{verbose});
     if (scalar @files) {
-        my $run = $schema->resultset('DBIx::Patcher::Run')->create_run;
+        my $run = $schema->resultset('Patcher::Run')->create_run;
 
         # create run record
         foreach my $file (@files) {
@@ -108,7 +108,7 @@ sub _patch_it {
     print " ($md5)" if ($opts->{verbose});
 
     # find file order by desc
-    my $last = $schema->resultset('DBIx::Patcher::Patch')
+    my $last = $schema->resultset('Patcher::Patch')
         ->search_file($chopped);
 
     my $skip;

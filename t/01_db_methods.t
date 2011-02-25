@@ -11,19 +11,20 @@ use Path::Class::File;
 note "Type stuff..";
 #my $target = Test::Meta::Framework->find_ilike_node('Node A2 ');
 my $run = Test::Framework->create_run();
-is(ref($run),'Patcher::Schema::Result::Patcher::Run',
+is(ref($run),'DBIx::Patcher::Schema::Result::Patcher::Run',
     'created a run');
 my $file = Test::Framework->uniq_name('file');
 my $patch = $run->add_patch(
     $file, 'MD5'
 #    Path::Class::File->new('t/data/file_1.sql'), 'MD5'
 );
-is(ref($patch),'Patcher::Schema::Result::Patcher::Patch',
+is(ref($patch),'DBIx::Patcher::Schema::Result::Patcher::Patch',
     "added patch to run - $file");
 
-my $patches = Test::Framework->search_file($file);
+my $patch = Test::Framework->search_file($file);
 
-is($patches->count, 1, "found file - $file");
+is(ref($patch), 'DBIx::Patcher::Schema::Result::Patcher::Patch',
+    "found file - $file");
 
 #my $got_rs = Test::Meta::Framework->get_type({ name => $type->name });
 #is($got_rs->count, 1,

@@ -94,7 +94,6 @@ sub add_patch {
     my $args = {
         created => \'default',
         filename => $file,
-        basename => $file,
         b64digest => $b64digest,
     };
    # output 

@@ -2,12 +2,12 @@ package Test::Framework;
 
 #use FindBin::lib;
 use Test::More;
-use Patcher::Schema;
+use DBIx::Patcher::Schema;
 
 {
     my $schema;
     sub get_schema {
-        $schema ||= Patcher::Schema->connect(
+        $schema ||= DBIx::Patcher::Schema->connect(
             'dbi:Pg:dbname=patcher;host=localhost',
             'www',
             '',
