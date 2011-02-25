@@ -17,6 +17,7 @@ key: * todo; + written; - tested
 === 0.02
 * --install
 * --dry
+* --verbose to show cmd run
 === 0.03
 * plugin
     * default values
