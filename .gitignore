@@ -1,2 +1,6 @@
 *.sw?
 inc/
+DBIx-Patcher-*
+MANIFEST
+Makefile.old
+
