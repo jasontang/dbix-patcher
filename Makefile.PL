@@ -20,6 +20,7 @@ test_requires (
     'Test::More' => '0.96',
 );
 
+install_script 'bin/patcher';
 WriteMakefile();
 
 license 'perl';
