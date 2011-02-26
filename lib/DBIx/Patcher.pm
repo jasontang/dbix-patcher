@@ -11,7 +11,14 @@ use DBIx::Patcher::Schema;
 use IO::File;
 use Digest::MD5;
 
-our $VERSION = '0.01';
+=pod
+
+=head1 NAME
+
+DBIx::Patcher - store history of patches applied in database schema
+
+=cut
+
 
 $|=1;
 our $opts = {
@@ -222,28 +229,89 @@ sub _install_me {
 
 1;
 __END__
-=pod
-
-=head1 NAME patcher
 
 =head1 SYNOPSIS
 
-patcher [-h localhost] [-u www] [-d my_db] patch_dir
+    # add patches already run on an existing db
+    patcher -h db-server -u bob -d my_db sql/0.01 --add
+
+    # running from within the location where the app/sql lives
+    patcher -h db-server -u bob -d my_db sql/0.01
+
+    # run patcher from anywhere and store filename correctly
+    patcher -h db-server -u bob -d my_db /opt/app/sql/0.01 -c /opt/app
+
+    # to retry previously failed patches
+    patcher -h db-server -u bob -d my_db sql/0.01 --retry
+
+=head1 DESCRIPTION
 
 =head1 OPTIONS
 
 =head2 --install
 
-=head2 --host
+TBA - install the patcher schema before doing anything else
 
-=head2 --user
+=head2 --host -h
 
-=head2 --database
+Host of the database. Defaults to localhost
 
-=head2
+=head2 --user -u
 
-=head2
+User for connecting to the database. Defaults to www
 
-=head1
+=head2 --database -d
+
+Name of the database
+
+=head2 --chop -c
+
+When patching remove this from the absolute path of the patch file to make
+the logging of patches relative from a certain point. Defaults to $PWD
+
+=head2 --retry
+
+For patches that have failed retry
+
+=head2 --add -a
+
+Any files found that haven't been run, just add them as if they run successfully
+
+=head2 --plugin
+
+TBA - specify a plugin to load and provide defaults/custom handling
+
+=head1 AUTHOR
+
+Jason Tang, C<< <tang.jason.ch at gmail.com> >>
+
+=head1 BUGS
+
+Please report any bugs or feature requests to C<bug-dbix-patch at rt.cpan.org>, or through
+the web interface at L<http://rt.cpan.org/NoAuth/ReportBug.html?Queue=DBIx-Patcher>.  I will be notified, and then you'll
+automatically be notified of progress on your bug as I make changes.
+
+=head1 SEE ALSO
+
+DBIx::Class
+
+=head1 SUPPORT
+
+You can find documentation for this module with the perldoc command.
+
+    perldoc DBix::Patcher
+
+
+=head1 LICENSE AND COPYRIGHT
+
+Copyright 2011 Jason Tang.
+
+This program is free software; you can redistribute it and/or modify it
+under the terms of either: the GNU General Public License as published
+by the Free Software Foundation; or the Artistic License.
+
+See http://dev.perl.org/licenses/ for more information.
+
 
 =cut
+
