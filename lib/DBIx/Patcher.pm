@@ -58,7 +58,11 @@ sub run {
         'verbose'   => \$opts->{verbose},
         'debug'     => \$opts->{debug},
 #        'dry'       => \$opts->{dry},
+        'version'     => \$opts->{version},
+        
     );
+
+    _version() if ($opts->{version});
 
     # FIXME: do we need to use a plugin?
     # merge in defaults into opt and share plugin
@@ -104,6 +108,10 @@ sub run {
     print "file: ". scalar @files ."\n" if ($opts->{debug});
 }
 
+sub _version {
+    print "  ". __PACKAGE__ ." $DBIx::Patcher::VERSION Jason Tang\n\n";
+    exit;
+}
 
 sub _patch_it {
     my($run,$file) = @_;
