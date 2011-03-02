@@ -285,6 +285,10 @@ For patches that have failed retry
 
 Any files found that haven't been run, just add them as if they run successfully
 
+=head2 --version
+
+Displays version information
+
 =head2 --plugin
 
 TBA - specify a plugin to load and provide defaults/custom handling
