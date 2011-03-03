@@ -108,6 +108,7 @@ sub add_successful_patch {
         created => \'default',
         filename => $file,
         b64digest => $b64digest,
+        output => 'PATCHER: Linked',
         success => 1,
     };
    # output 
