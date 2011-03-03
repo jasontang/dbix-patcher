@@ -14,14 +14,14 @@ key: * todo; + written; - tested
 + --add patches pretending it succeeded
 + use short options ie -d -h -u etc
 - change name space of modules to DBIx::Patcher
-* Pg is prerequisite
++ Pg is prerequisite
 * Testing
 * Clean up
++ --matchmd5
++ --link
++ --verbose to show cmd run
 === stage 2
 * --install
-* --dry
-* --verbose to show cmd run
-* option to do look up based on MD5
 === stage 3
 * plugin
     * default values

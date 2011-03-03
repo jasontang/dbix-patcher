@@ -96,8 +96,6 @@ sub add_patch {
         filename => $file,
         b64digest => $b64digest,
     };
-   # output 
-#    success boolean DEFAULT false,
 
     return $self->create_related('patches', $args);
 }
@@ -111,8 +109,6 @@ sub add_successful_patch {
         output => 'PATCHER: Linked',
         success => 1,
     };
-   # output 
-#    success boolean DEFAULT false,
 
     return $self->create_related('patches', $args);
 }

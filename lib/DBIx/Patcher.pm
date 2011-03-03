@@ -173,7 +173,7 @@ sub _patch_it {
                         $state = 'SAME';
                     }
                 } else {
-                    $state = 'SAME-FAILED';
+                    $state = 'RETRY';
                 }
                 $skip = 1;
             # 
@@ -195,15 +195,12 @@ sub _patch_it {
 }
 
 sub _chop_file {
-    my($self,$chopped,$file) = @_;
+    my($self,$file) = @_;
 
     if ($opts->{chop}) {
-        return $chopped->relative($opts->{chop});
-    } else {
-        # FIXME: relative to myself?
-die "should be chop!!";
+        return $file->relative($opts->{chop});
     }
-#    return $chopped;
+    die "should be chop!!";
 }
 
 sub _apply_patch {
@@ -213,11 +210,9 @@ sub _apply_patch {
     my $cmd = $types->{$opts->{type}}->{cmd}($file->absolute);
     my $state;
 
-
     print "cmd: $cmd\n" if ($opts->{debug});
 
     my $output = ($opts->{add}) ? 'PATCHER: Added' : qx{$cmd 2>&1};
-
     my $patch_fields = { output => $output };
     # successful
     if (!$opts->{add} && $output =~ m{ERROR:}xms) {
