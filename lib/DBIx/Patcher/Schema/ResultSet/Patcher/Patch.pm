@@ -24,5 +24,23 @@ sub search_file {
     return $set->slice(0,0)->first;
 }
 
+=head2 search_md5($md5)
+
+Find records where the md5 matches and return the set for further investigating
+
+=cut
+sub search_md5 {
+    my($self,$md5) = @_;
+
+    my $set =  $self->search({
+        b64digest => $md5,
+    },{
+        order_by => 'created desc',
+    });
+
+    return if (!$set or $set->count == 0);
+
+    return $set;
+}
 
 1;

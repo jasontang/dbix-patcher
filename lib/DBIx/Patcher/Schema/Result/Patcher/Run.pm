@@ -101,4 +101,18 @@ sub add_patch {
 
     return $self->create_related('patches', $args);
 }
+
+sub add_successful_patch {
+    my($self,$file,$b64digest) = @_;
+    my $args = {
+        created => \'default',
+        filename => $file,
+        b64digest => $b64digest,
+        success => 1,
+    };
+   # output 
+#    success boolean DEFAULT false,
+
+    return $self->create_related('patches', $args);
+}
 1;

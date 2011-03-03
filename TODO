@@ -14,6 +14,9 @@ key: * todo; + written; - tested
 + --add patches pretending it succeeded
 + use short options ie -d -h -u etc
 - change name space of modules to DBIx::Patcher
+* Pg is prerequisite
+* Testing
+* Clean up
 === stage 2
 * --install
 * --dry
@@ -23,3 +26,6 @@ key: * todo; + written; - tested
 * plugin
     * default values
     * collate_files($dir)
+=== stage 4
+* --type
+* Mysql optional

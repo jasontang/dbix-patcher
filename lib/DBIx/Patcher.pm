@@ -42,7 +42,7 @@ our $types = {
 our $schema;
 
 sub run {
-    my($package) = @_;
+    my($self) = @_;
 
     GetOptions(
         'host|h=s'    => \$opts->{host},
@@ -59,10 +59,11 @@ sub run {
         'debug'     => \$opts->{debug},
 #        'dry'       => \$opts->{dry},
         'version'     => \$opts->{version},
-        
+        'matchmd5'     => \$opts->{matchmd5},
+        'link'     => \$opts->{link},
     );
 
-    _version() if ($opts->{version});
+    $self->_version() if ($opts->{version});
 
     # FIXME: do we need to use a plugin?
     # merge in defaults into opt and share plugin
@@ -88,17 +89,18 @@ sub run {
     # remaining paramters must be directories
     my @files;
     foreach my $dir (@ARGV) {
-        push @files, _collate_patches($dir);
+        push @files, $self->_collate_patches($dir);
     }
+    print "  Found ". scalar @files ." file(s)\n" if ($opts->{verbose});
+
 
     # patch with the files
-    print "  Found ". scalar @files ." file(s)\n" if ($opts->{verbose});
     if (scalar @files) {
         my $run = $schema->resultset('Patcher::Run')->create_run;
 
         # create run record
         foreach my $file (@files) {
-            _patch_it($run,$file);
+            $self->_patch_it($run,$file);
         }
         $run->update({ finish => \'default' });
     }
@@ -114,19 +116,26 @@ sub _version {
 }
 
 sub _patch_it {
-    my($run,$file) = @_;
+    my($self,$run,$file) = @_;
     my $state;
 
-    my $chopped = _chop_file($file);
+    my $chopped = $self->_chop_file($file);
     # check $opts->{dry}
     print "    $chopped";
 
-    my $md5 = _md5_it($file);
+    my $md5 = $self->_md5_it($file);
     print " ($md5)" if ($opts->{verbose});
 
     # find file order by desc
     my $last = $schema->resultset('Patcher::Patch')
         ->search_file($chopped);
+    my $lastmd5;
+
+    # if we don't have a direct file match try matching md5
+    if (!$last && $opts->{matchmd5}) {
+        $lastmd5 = $schema->resultset('Patcher::Patch')
+            ->search_md5($md5);
+    }
 
     my $skip;
     if ($last) {
@@ -144,10 +153,39 @@ sub _patch_it {
             $state = 'CHANGED';
             $skip = 1;
         }
+    } elsif (!$last && $opts->{matchmd5}) {
+        # we have something useful from seaching for md5
+        if ($lastmd5) {
+            # 1 exact match means it is the same file
+            if ($lastmd5->count == 1) {
+                my $patch = $lastmd5->first;
+
+                if ($patch->is_successful) {
+                    print " (".$patch->filename.")";
+
+                    # indicated we want to just link it
+                    if ($opts->{link}) {
+                        $run->add_successful_patch($chopped,$md5);
+                        $state = 'LINKED';
+
+                    # could potentially link these files
+                    } else {
+                        $state = 'SAME';
+                    }
+                } else {
+                    $state = 'SAME-FAILED';
+                }
+                $skip = 1;
+            # 
+            } elsif ($lastmd5->count > 1) {
+                $state = 'MULTIPLE';
+                $skip = 1;
+            }
+        }
     }
 
     if (!$skip) {
-        $state = _apply_patch($run,$file,$md5,$chopped);
+        $state = $self->_apply_patch($run,$file,$md5,$chopped);
     }
 
     if (!defined $state) {
@@ -157,7 +195,7 @@ sub _patch_it {
 }
 
 sub _chop_file {
-    my($chopped,$file) = @_;
+    my($self,$chopped,$file) = @_;
 
     if ($opts->{chop}) {
         return $chopped->relative($opts->{chop});
@@ -169,7 +207,7 @@ die "should be chop!!";
 }
 
 sub _apply_patch {
-    my($run,$file,$md5,$chopped) = @_;
+    my($self,$run,$file,$md5,$chopped) = @_;
 
     my $patch = $run->add_patch($chopped,$md5);
     my $cmd = $types->{$opts->{type}}->{cmd}($file->absolute);
@@ -204,7 +242,7 @@ sub _apply_patch {
 }
 
 sub _md5_it {
-    my($file) = @_;
+    my($self,$file) = @_;
     my $io = IO::File->new;
     $io->open("< ". $file->relative);
     $io->binmode;
@@ -217,7 +255,7 @@ sub _md5_it {
 }
 
 sub _collate_patches {
-    my($path) = @_;
+    my($self,$path) = @_;
     my $dir = Path::Class::Dir->new($path);
 
     my @files;
@@ -288,6 +326,17 @@ Any files found that haven't been run, just add them as if they run successfully
 =head2 --version
 
 Displays version information
+
+=head2 --matchmd5
+
+When the filename cannot be found, try matching md5 against previous patches.
+Files that are matched show the filename and flagged 'SAME'. Use --link to
+create a record linking them.
+
+=head2 --link
+
+Files that are md5 matched are linked so its in future not run again. Use with
+care as if patches are exactly the same by content it WON'T be run.
 
 =head2 --plugin
 
