@@ -10,6 +10,7 @@ use Path::Class;
 use DBIx::Patcher::Schema;
 use IO::File;
 use Digest::MD5;
+use File::ShareDir;
 
 =pod
 
@@ -83,7 +84,7 @@ sub run {
 
     # is it an install
     if ($opts->{install}) {
-        _install_me();
+        $self->_install_me($schema);
     }
 
     # remaining paramters must be directories
@@ -265,7 +266,13 @@ sub _collate_patches {
 }
 
 sub _install_me {
+    my($self,$schema) = @_;
+
     print "_install_me:  To be implemented\n";
+    $schema->deploy({},
+#        [ File::ShareDir::module_dir("DBIx::Patcher"), "sql", "schema" ]
+        [ "lib/DBIx/Patcher.pm", "sql", "schema" ]
+    );
 }
 
 1;
