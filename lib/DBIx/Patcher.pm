@@ -38,6 +38,29 @@ our $types = {
             return "dbi:$opts->{type}:dbname=$opts->{db};"
                 ."host=$opts->{host}";
         },
+        sql => qq/
+BEGIN;
+
+CREATE SCHEMA patcher;
+
+CREATE TABLE patcher.run (
+    id SERIAL PRIMARY KEY,
+    start timestamp with time zone DEFAULT now() NOT NULL,
+    finish timestamp with time zone DEFAULT now() NOT NULL
+);
+
+CREATE TABLE patcher.patch (
+    id SERIAL PRIMARY KEY,
+    run_id integer REFERENCES patcher.run(id) DEFERRABLE,
+    created timestamp with time zone DEFAULT now() NOT NULL,
+    filename text NOT NULL,
+    success boolean DEFAULT false,
+    b64digest TEXT,
+    output text
+);
+
+COMMIT;
+        /,
     },
 };
 our $schema;
@@ -62,6 +85,8 @@ sub run {
         'version'     => \$opts->{version},
         'matchmd5'     => \$opts->{matchmd5},
         'link'     => \$opts->{link},
+
+        'schema'        => \$opts->{schema},
     );
 
     $self->_version() if ($opts->{version});
@@ -81,6 +106,7 @@ sub run {
         $opts->{user}, $opts->{pass},
     );
 
+    $self->_schema_sql() if ($opts->{schema});
 
     # is it an install
     if ($opts->{install}) {
@@ -275,6 +301,17 @@ sub _install_me {
     );
 }
 
+sub _schema_sql {
+    my($self) = @_;
+
+    my $sql = $types->{ $opts->{type} }->{sql} || undef;
+    if ($sql) {
+        print "$sql\n\n";
+    } else {
+        print "  Cannot find sql for type '$opts->{type}'\n\n";
+    }
+    exit;
+}
 1;
 __END__
 
