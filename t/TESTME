@@ -1,0 +1,10 @@
+SET
+* Patcher/Patch.pm:sub search_file {
+* Patcher/Patch.pm:sub search_md5 {
+* Patcher/Run.pm:sub create_run {
+
+ROW
+Patcher/Patch.pm:sub is_successful {
+Patcher/Run.pm:sub add_patch {
+Patcher/Run.pm:sub add_successful_patch {
+

@@ -26,7 +26,24 @@ use DBIx::Patcher::Schema;
     sub create_run {
         my($self) = @_;
 
-        return $self->get_schema->resultset('Patcher::Run')->create_run();
+        my $run = $self->get_schema->resultset('Patcher::Run')->create_run();
+        is(ref($run),'DBIx::Patcher::Schema::Result::Patcher::Run',
+            'created a run');
+
+        return $run;
+    }
+
+    sub add_patch {
+        my($self,$file,$md5) = @_;
+        $md5 ||= 'MD5';
+
+        my $patch = $run->add_patch(
+            $file, $md5
+        );
+        is(ref($patch),'DBIx::Patcher::Schema::Result::Patcher::Patch',
+            "added patch to run - $file");
+
+        return $patch;
     }
 
     sub search_file {
@@ -34,6 +51,13 @@ use DBIx::Patcher::Schema;
 
         return $self->get_schema->resultset('Patcher::Patch')
             ->search_file($file);
+    }
+
+    sub search_md5 {
+        my($self,$md5) = @_;
+
+        return $self->get_schema->resultset('Patcher::Patch')
+            ->search_md5($md5);
     }
 #
 #    sub get_node {

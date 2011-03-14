@@ -7,6 +7,7 @@ all_from 'lib/DBIx/Patcher.pm';
 requires (
     'DateTime' => '0.66',
     'DBIx::Class' => '0.08124',
+    'DBD::Pg' => '2.16.1',
     'Carp' => '1.11',
     'Data::Dump' => '1.19',
     'Digest::MD5' => '2.39',
