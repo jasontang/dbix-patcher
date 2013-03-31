@@ -112,4 +112,9 @@ sub add_successful_patch {
 
     return $self->create_related('patches', $args);
 }
+
+sub finish_now {
+    my($self) = @_;
+    return $self->update({ finish => \'default' });
+}
 1;

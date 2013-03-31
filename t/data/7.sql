@@ -1,7 +1,7 @@
 BEGIN;
 
--- file_3.sql
--- file passed same
+-- file_7.sql
+-- md5 passed same
 SELECT count(*) FROM patcher.run;
 
 COMMIT;

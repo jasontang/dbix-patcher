@@ -6,11 +6,7 @@ use FindBin::libs;
 use Carp;
 use Data::Dump qw/pp/;
 use Getopt::Long;
-use Path::Class;
-use DBIx::Patcher::Schema;
-use IO::File;
-use Digest::MD5;
-use File::ShareDir;
+use DBIx::Patcher::Core;
 
 =pod
 
@@ -22,119 +18,55 @@ DBIx::Patcher - store history of patches applied in database schema
 
 
 $|=1;
-our $opts = {
-    host => 'localhost',
-    user => 'www',
-    type => 'Pg',
-    pass => '',
-};
-our $types = {
-    Pg => {
-        cmd => sub {
-            return "psql -U $opts->{user} -h $opts->{host} $opts->{db} "
-                ."-f $_[0]";
-        },
-        dsn => sub {
-            return "dbi:$opts->{type}:dbname=$opts->{db};"
-                ."host=$opts->{host}";
-        },
-        sql => qq/
-BEGIN;
-
-CREATE SCHEMA patcher;
-
-CREATE TABLE patcher.run (
-    id SERIAL PRIMARY KEY,
-    start timestamp with time zone DEFAULT now() NOT NULL,
-    finish timestamp with time zone DEFAULT now() NOT NULL
-);
-
-CREATE TABLE patcher.patch (
-    id SERIAL PRIMARY KEY,
-    run_id integer REFERENCES patcher.run(id) DEFERRABLE,
-    created timestamp with time zone DEFAULT now() NOT NULL,
-    filename text NOT NULL,
-    success boolean DEFAULT false,
-    b64digest TEXT,
-    output text
-);
-
-COMMIT;
-        /,
-    },
-};
 our $schema;
 
 sub run {
     my($self) = @_;
 
+    my $opts = $self->_process_commandline();
+    $self->_version()   if ($opts->{version});
+    $self->_help()      if ($opts->{help});
+
+    foreach my $key (keys %{$opts}) {
+        delete $opts->{$key} if (!defined $opts->{$key});
+    }
+
+    DBIx::Patcher::Core->new($opts)->invoke(\@ARGV);
+}
+
+sub _process_commandline {
+    my($self) = @_;
+    my $opts;
+
     GetOptions(
-        'host|h=s'    => \$opts->{host},
-        'user|u=s'    => \$opts->{user},
-        'db|d=s'      => \$opts->{db},
-        'pass|p=s'    => \$opts->{pass},
-        'retry|r'     => \$opts->{retry},
-        'chop|c=s'    => \$opts->{chop},
-        'add|a'       => \$opts->{add},
+        'host|h=s'      => \$opts->{host},
+        'user|u=s'      => \$opts->{user},
+        'db|d=s'        => \$opts->{db},
+        'pass|p=s'      => \$opts->{pass},
 
-        'install'   => \$opts->{install},
-#        'plugin=s'  => \$opts->{plugin},
-        'verbose'   => \$opts->{verbose},
-        'debug'     => \$opts->{debug},
-#        'dry'       => \$opts->{dry},
-        'version'     => \$opts->{version},
-        'matchmd5'     => \$opts->{matchmd5},
-        'link'     => \$opts->{link},
+        'retry|r'       => \$opts->{retry},
+        'base|b=s'      => \$opts->{base},
+        'add|a'         => \$opts->{add},
+        'version'       => \$opts->{version},
 
-        'schema'        => \$opts->{schema},
+        'verbose'       => \$opts->{verbose},
+        'debug'         => \$opts->{debug},
+        'matchmd5'      => \$opts->{matchmd5},
+        'link'          => \$opts->{link},
+        'config|f=s'    => \$opts->{config},
+#        'dry'           => \$opts->{dry},
+#        'install'       => \$opts->{install},
+#        'plugin=s'      => \$opts->{plugin},
+#        'schema'        => \$opts->{schema},
+
     );
 
-    $self->_version() if ($opts->{version});
-
-    # FIXME: do we need to use a plugin?
-    # merge in defaults into opt and share plugin
-    $opts->{chop} = Path::Class::Dir->new(
-        $opts->{chop} ? $opts->{chop} : '.' )
-        ->absolute->resolve->cleanup;
-
-    # initiate db
-    my $type = $opts->{type};
-    my $db = $opts->{db};
-    my $host = $opts->{host};
-    $schema = DBIx::Patcher::Schema->connect(
-        $types->{$opts->{type}}->{dsn}(),
-        $opts->{user}, $opts->{pass},
-    );
-
-    $self->_schema_sql() if ($opts->{schema});
-
-    # is it an install
-    if ($opts->{install}) {
-        $self->_install_me($schema);
+    if ($opts->{config}) {
+        # FIXME: allow config file
+        # load config
+        # overlay with $opts
     }
-
-    # remaining paramters must be directories
-    my @files;
-    foreach my $dir (@ARGV) {
-        push @files, $self->_collate_patches($dir);
-    }
-    print "  Found ". scalar @files ." file(s)\n" if ($opts->{verbose});
-
-
-    # patch with the files
-    if (scalar @files) {
-        my $run = $schema->resultset('Patcher::Run')->create_run;
-
-        # create run record
-        foreach my $file (@files) {
-            $self->_patch_it($run,$file);
-        }
-        $run->update({ finish => \'default' });
-    }
-
-    print "opts: ". pp($opts) ."\n" if ($opts->{debug});
-    print "argv: ". pp(\@ARGV) ."\n" if ($opts->{debug});
-    print "file: ". scalar @files ."\n" if ($opts->{debug});
+    return $opts;
 }
 
 sub _version {
@@ -142,176 +74,41 @@ sub _version {
     exit;
 }
 
-sub _patch_it {
-    my($self,$run,$file) = @_;
-    my $state;
+sub _help {
+    print <<END;
+  $0
+    host|h
+    user|u
+    db|d
+    pass|p
+    base|b
 
-    my $chopped = $self->_chop_file($file);
-    # check $opts->{dry}
-    print "    $chopped";
+    retry|r
+    add|a
+    version
+    verbose
+    debug
+    matchmd5
+    link
+    config|f
 
-    my $md5 = $self->_md5_it($file);
-    print " ($md5)" if ($opts->{verbose});
-
-    # find file order by desc
-    my $last = $schema->resultset('Patcher::Patch')
-        ->search_file($chopped);
-    my $lastmd5;
-
-    # if we don't have a direct file match try matching md5
-    if (!$last && $opts->{matchmd5}) {
-        $lastmd5 = $schema->resultset('Patcher::Patch')
-            ->search_md5($md5);
-    }
-
-    my $skip;
-    if ($last) {
-        if ($last->b64digest eq $md5) {
-            if ($last->is_successful) {
-                $state = 'SKIP';
-                $skip = 1;
-            } else {
-                if (!$opts->{retry}) {
-                    $state = 'RETRY';
-                    $skip = 1;
-                }
-            }
-        } else {
-            $state = 'CHANGED';
-            $skip = 1;
-        }
-    } elsif (!$last && $opts->{matchmd5}) {
-        # we have something useful from seaching for md5
-        if ($lastmd5) {
-            # 1 exact match means it is the same file
-            if ($lastmd5->count == 1) {
-                my $patch = $lastmd5->first;
-
-                if ($patch->is_successful) {
-                    print " (".$patch->filename.")";
-
-                    # indicated we want to just link it
-                    if ($opts->{link}) {
-                        $run->add_successful_patch($chopped,$md5);
-                        $state = 'LINKED';
-
-                    # could potentially link these files
-                    } else {
-                        $state = 'SAME';
-                    }
-                } else {
-                    $state = 'RETRY';
-                }
-                $skip = 1;
-            # 
-            } elsif ($lastmd5->count > 1) {
-                $state = 'MULTIPLE';
-                $skip = 1;
-            }
-        }
-    }
-
-    if (!$skip) {
-        $state = $self->_apply_patch($run,$file,$md5,$chopped);
-    }
-
-    if (!defined $state) {
-        die "Expecting to have a state set by now!!";
-    }
-    print " .. $state\n";
-}
-
-sub _chop_file {
-    my($self,$file) = @_;
-
-    if ($opts->{chop}) {
-        return $file->relative($opts->{chop});
-    }
-    die "should be chop!!";
-}
-
-sub _apply_patch {
-    my($self,$run,$file,$md5,$chopped) = @_;
-
-    my $patch = $run->add_patch($chopped,$md5);
-    my $cmd = $types->{$opts->{type}}->{cmd}($file->absolute);
-    my $state;
-
-    print "cmd: $cmd\n" if ($opts->{debug});
-
-    my $output = ($opts->{add}) ? 'PATCHER: Added' : qx{$cmd 2>&1};
-    my $patch_fields = { output => $output };
-    # successful
-    if (!$opts->{add} && $output =~ m{ERROR:}xms) {
-        $state = 'FAILED';
-        $patch_fields = {
-            output => $output,
-        };
-    } else {
-        if ($opts->{add}) {
-            $state = 'ADDED';
-        } else {
-            $state = 'OK';
-        }
-        $patch_fields = {
-            success => 1,
-            output => $output,
-        };
-    }
-
-    $patch->update($patch_fields);
-    return $state;
-}
-
-sub _md5_it {
-    my($self,$file) = @_;
-    my $io = IO::File->new;
-    $io->open("< ". $file->relative);
-    $io->binmode;
-
-    my $digester = Digest::MD5->new;
-    $digester->addfile($io);
-
-    my $digest = $digester->b64digest;
-    return $digest;
-}
-
-sub _collate_patches {
-    my($self,$path) = @_;
-    my $dir = Path::Class::Dir->new($path);
-
-    my @files;
-    foreach my $child ($dir->children) {
-        if (!$child->isa('Path::Class::Dir')
-            && $child->relative($dir) =~ /\.sql$/i) {
-            push @files, $child;
-        }
-    }
-
-    return sort { $a->relative($dir) cmp $b->relative($dir) } @files;
-}
-
-sub _install_me {
-    my($self,$schema) = @_;
-
-    print "_install_me:  To be implemented\n";
-    $schema->deploy({},
-#        [ File::ShareDir::module_dir("DBIx::Patcher"), "sql", "schema" ]
-        [ "lib/DBIx/Patcher.pm", "sql", "schema" ]
-    );
-}
-
-sub _schema_sql {
-    my($self) = @_;
-
-    my $sql = $types->{ $opts->{type} }->{sql} || undef;
-    if ($sql) {
-        print "$sql\n\n";
-    } else {
-        print "  Cannot find sql for type '$opts->{type}'\n\n";
-    }
+States
+SKIP
+    Filename matched and successfully run preiously
+RETRY
+    Filename matched but didn't previously successfully run
+CHANGED
+    Filename matched but file content changed
+END
     exit;
+#SAME
+#    MD5 matched but different filename.
+#LINKED
+#    MD5 matched and requested file is linked
+#MULTIPLE
+#    MD5 matching gave multiple matches
 }
+
 1;
 __END__
 
@@ -324,7 +121,7 @@ __END__
     patcher -h db-server -u bob -d my_db sql/0.01
 
     # run patcher from anywhere and store filename correctly
-    patcher -h db-server -u bob -d my_db /opt/app/sql/0.01 -c /opt/app
+    patcher -h db-server -u bob -d my_db /opt/app/sql/0.01 -b /opt/app
 
     # to retry previously failed patches
     patcher -h db-server -u bob -d my_db sql/0.01 --retry
@@ -349,7 +146,7 @@ User for connecting to the database. Defaults to www
 
 Name of the database
 
-=head2 --chop -c
+=head2 --base -b
 
 When patching remove this from the absolute path of the patch file to make
 the logging of patches relative from a certain point. Defaults to $PWD

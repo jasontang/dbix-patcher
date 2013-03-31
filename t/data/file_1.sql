@@ -1,5 +1,7 @@
 BEGIN;
 
-select count(*) from patcher.run;
+-- file_1.sql
+-- new passing
+SELECT count(*) FROM patcher.run;
 
-COMMIT:
+COMMIT;
