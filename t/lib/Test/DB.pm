@@ -2,6 +2,7 @@ package Test::DB;
 use Moo;
 use Test::More;
 use Test::DBD;
+use Test::Framework;
 use Test::Schema::Patcher::Run qw/create_run/;
 use Test::Schema::Patcher::Patch qw/create_patch/;
 use Test::Patcher;
@@ -181,6 +182,63 @@ sub global_setup {
             }
         }
     }
+
+    return $self;
+}
+
+sub run_dbix_tests {
+    my($self) = @_;
+
+    my $schema = Test::Framework->get_schema;
+    my $run_rs = $schema->resultset('Patcher::Run');
+    my $patch_rs = $schema->resultset('Patcher::Patch');
+    isa_ok($run_rs,'DBIx::Patcher::Schema::ResultSet::Patcher::Run');
+
+    # set run
+    ok($run_rs->can('create_run'),'create_run()');
+    my $run = $run_rs->create_run();
+    isa_ok($run,'DBIx::Patcher::Schema::Result::Patcher::Run');
+    is($run->finish,undef,'not finished');
+
+    # row run
+    ok($run->can('add_patch'),'add_patch()');
+    my $rv = $run->add_patch('some_file.sql','md5value');
+    $rv->discard_changes;
+    isa_ok($rv,'DBIx::Patcher::Schema::Result::Patcher::Patch');
+    is($rv->filename,'some_file.sql','filename preserved');
+    is($rv->b64digest,'md5value','b64digest preserved');
+    is($rv->success,0,'default success (false)');
+
+    ok($run->can('add_successful_patch'),'add_successful_patch()');
+    $rv = $run->add_successful_patch('another_file.sql','md5value2');
+    $rv->discard_changes;
+    isa_ok($rv,'DBIx::Patcher::Schema::Result::Patcher::Patch');
+    is($rv->filename,'another_file.sql','filename preserved');
+    is($rv->b64digest,'md5value2','b64digest preserved');
+    is($rv->success,1,'success true');
+
+    ok($run->can('finish_now'),'finish_now()');
+    $rv = $run->finish_now();
+    $rv->discard_changes;
+    isnt($run->finish,undef,'finish set');
+
+    # set patch
+    isa_ok($patch_rs,'DBIx::Patcher::Schema::ResultSet::Patcher::Patch');
+    is($patch_rs->search_file('unknown.sql'),undef,'unknown patch');
+    isa_ok($patch_rs->search_file('some_file.sql'),
+        'DBIx::Patcher::Schema::Result::Patcher::Patch');
+
+    isa_ok($patch_rs,'DBIx::Patcher::Schema::ResultSet::Patcher::Patch');
+    is($patch_rs->search_md5('unknownmd5value'),undef,'unknown md5');
+    isa_ok($patch_rs->search_md5('md5value'),
+        'DBIx::Patcher::Schema::ResultSet::Patcher::Patch');
+    diag "FIXME: are we sure we want a set?";
+
+    # row patch
+    is($patch_rs->search_file('some_file.sql')->is_successful,0,
+        'not successful');
+    is($patch_rs->search_file('another_file.sql')->is_successful,1,
+        'successful');
 
     return $self;
 }

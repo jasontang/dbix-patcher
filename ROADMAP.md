@@ -21,7 +21,7 @@ doesn't. When it comes to database patches the content is the value bit.
 
 * Install Option
 
-
+---
 
 # STRUCTURE
 
@@ -55,28 +55,32 @@ call this within an application if you fancied.
 * cmd (tested)
 * dsn (tested)
 * type (tested)
+* install_sql
 
 ## DBIx::Patcher::DBD::SQLite
 * cmd
 * dsn
 * type
+* install_sql
 
 ## DBIx::Patcher::Schema
 ### Result::Patcher::Run
-* add_patch
-* add_successful_patch
-* finish_now
+* add_patch (tested)
+* add_successful_patch (tested)
+* finish_now (tested)
 
 ### Result::Patcher::Patch
-* is_successful
+* is_successful (tested)
 
 ### ResultSet::Patcher::Run
-* create_run
+* create_run (tested)
 
 ### ResultSet::Patcher::Patch
-* search_file
-* search_md5
+* search_file (tested)
+* search_md5 (tested)
 
+
+---
 
 
 # STATES

@@ -31,6 +31,8 @@ sub run {
         delete $opts->{$key} if (!defined $opts->{$key});
     }
 
+    $self->_install     if ($opts->{install});
+
     DBIx::Patcher::Core->new($opts)->invoke(\@ARGV);
 }
 
@@ -48,8 +50,10 @@ sub _process_commandline {
         'base|b=s'      => \$opts->{base},
         'add|a'         => \$opts->{add},
         'version'       => \$opts->{version},
-
         'verbose'       => \$opts->{verbose},
+
+        'install'       => \$opts->{install},
+
         'debug'         => \$opts->{debug},
         'matchmd5'      => \$opts->{matchmd5},
         'link'          => \$opts->{link},
@@ -71,6 +75,10 @@ sub _process_commandline {
 
 sub _version {
     print "  ". __PACKAGE__ ." $DBIx::Patcher::VERSION Jason Tang\n\n";
+    exit;
+}
+sub _install {
+    print DBIx::Patcher::Core->new()->install() ."\n";
     exit;
 }
 

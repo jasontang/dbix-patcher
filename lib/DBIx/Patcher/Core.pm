@@ -162,6 +162,11 @@ sub try_patching {
 
 
 
+sub install {
+    my($self) = @_;
+    return $self->driver->install_sql();
+}
+
 # FIXME
 #sub _install_me {
 #    my($self,$schema) = @_;

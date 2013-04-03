@@ -39,6 +39,7 @@ is(
 
 Test::DB->new
     ->clear()
+    ->run_dbix_tests
     ->global_setup($uuid)
     ->run_test_cases
 ;
